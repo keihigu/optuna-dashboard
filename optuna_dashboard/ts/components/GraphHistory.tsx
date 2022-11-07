@@ -95,7 +95,7 @@ export const GraphHistory: FC<{
             <Select value={objectiveId} onChange={handleObjectiveChange}>
               {study.directions.map((d, i) => (
                 <MenuItem value={i} key={i}>
-                  {i}
+                  {i}:{study.objective_names[i]}
                 </MenuItem>
               ))}
             </Select>

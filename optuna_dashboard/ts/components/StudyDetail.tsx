@@ -67,6 +67,10 @@ interface Preference {
   reloadInterval: number
 }
 
+interface ObjectiveList {
+  [id: number]: string
+}
+
 export const StudyDetail: FC<{
   toggleColorMode: () => void
 }> = ({ toggleColorMode }) => {
@@ -77,6 +81,7 @@ export const StudyDetail: FC<{
   const studyDetail = useStudyDetailValue(studyIdNumber)
   const studySummary = useStudySummaryValue(studyIdNumber)
   const directions = studyDetail?.directions || studySummary?.directions || null
+  const names = studyDetail?.objective_names
 
   const [preferences, setPreferences] = useState<Preference>({
     graphHistoryChecked: true,
@@ -99,6 +104,15 @@ export const StudyDetail: FC<{
   useEffect(() => {
     localStorage.setItem("savedPref", JSON.stringify(preferences))
   }, [preferences])
+
+  const handleTextChanged = (i: number, text: string) => {
+    if (names) {
+      const merged = [...names]
+      merged[i] = text
+      console.log(merged)
+      action.setObjectiveNames(studyIdNumber, merged)
+    }
+  }
 
   const [prefOpen, setPrefOpen] = useState(false)
   const handleClickOpen = () => {
@@ -248,6 +262,25 @@ export const StudyDetail: FC<{
               }
               label="NoteEditor"
             />
+          </FormGroup>
+        </MuiDialogContent>
+        <MuiDialogContent dividers>
+          <FormLabel component="legend">Objective IDs</FormLabel>
+          <FormGroup>
+            {names
+              ? names.map((name, i) => (
+                  <TextField
+                    required
+                    key={i}
+                    label={i}
+                    value={name}
+                    onChange={(event) =>
+                      handleTextChanged(i, event.target.value)
+                    }
+                    margin="dense"
+                  />
+                ))
+              : null}
           </FormGroup>
         </MuiDialogContent>
       </Dialog>
@@ -649,36 +682,6 @@ export const TrialTable: FC<{ studyDetail: StudyDetail | null }> = ({
         trials[i].params.map((p) => p.name + ": " + p.value).join(", "),
     })
   }
-
-  studyDetail?.union_user_attrs.forEach((attr_name) => {
-    columns.push({
-      field: "user_attrs",
-      label: `User attribute ${attr_name}`,
-      toCellValue: (i) =>
-        trials[i].user_attrs.find((attr) => attr.key === attr_name)?.value ||
-        null,
-      sortable: true,
-      filterable: true,
-      less: (firstEl, secondEl): number => {
-        const firstVal = firstEl.user_attrs.find(
-          (attr) => attr.key === attr_name
-        )?.value
-        const secondVal = secondEl.user_attrs.find(
-          (attr) => attr.key === attr_name
-        )?.value
-
-        if (firstVal === secondVal) {
-          return 0
-        } else if (firstVal && secondVal) {
-          return firstVal < secondVal ? 1 : -1
-        } else if (firstVal) {
-          return -1
-        } else {
-          return 1
-        }
-      },
-    })
-  })
 
   const collapseParamColumns: DataGridColumn<TrialParam>[] = [
     { field: "name", label: "Name", sortable: true },

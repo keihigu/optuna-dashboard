@@ -56,6 +56,18 @@ export const actionCreator = () => {
             ? studyDetails[studyId].trials.slice(0, nLocalFixedTrials)
             : []
         study.trials = currentFixedTrials.concat(study.trials)
+        study.objective_names = study.directions.map((v, i) => `${i}`)
+        //console.log(study.directions, study.objective_names)
+        const localStorageIDName = `savedObjectiveName_${studyId}`
+        const localStorageObjectiveIDs =
+          localStorage.getItem(localStorageIDName)
+        if (localStorageObjectiveIDs !== null) {
+          const names = { ...JSON.parse(localStorageObjectiveIDs) }
+          if (Object.keys(names).length > 0) {
+            study.objective_names = Object.keys(names).map((k, i) => names[i])
+          }
+        }
+
         setStudyDetailState(studyId, study)
       })
       .catch((err) => {
@@ -102,6 +114,18 @@ export const actionCreator = () => {
       })
   }
 
+  const setObjectiveNames = (studyId: number, objectiveNames: string[]) => {
+    // 1. localStorageにobjective_namesをセットします
+    // TODO: ここでlocalStorageを更新する
+    const localStorageIDName = `savedObjectiveName_${studyId}`
+    localStorage.setItem(localStorageIDName, JSON.stringify(objectiveNames))
+
+    // 2. studyDetailState.objective_namesにobjective_namesをセットします
+    const newVal = Object.assign({}, studyDetails)
+    newVal[studyId] = { ...newVal[studyId], objective_names: objectiveNames }
+    setStudyDetails(newVal)
+  }
+
   const saveNote = (studyId: number, note: Note): Promise<void> => {
     return saveNoteAPI(studyId, note)
       .then(() => {
@@ -134,6 +158,7 @@ export const actionCreator = () => {
     createNewStudy,
     deleteStudy,
     saveNote,
+    setObjectiveNames,
   }
 }
 

@@ -49,7 +49,7 @@ export const GraphParallelCoordinate: FC<{
             <Select value={objectiveId} onChange={handleObjectiveChange}>
               {study.directions.map((d, i) => (
                 <MenuItem value={i} key={i}>
-                  {i}
+                  {i}: {study.objective_names[i]}
                 </MenuItem>
               ))}
             </Select>
@@ -89,9 +89,9 @@ const plotCoordinate = (
   const layout: Partial<plotly.Layout> = {
     margin: {
       l: 70,
-      t: 50,
+      t: 100,
       r: 50,
-      b: 100,
+      b: 0,
     },
     template: mode === "dark" ? plotlyDarkTemplate : {},
   }
@@ -168,19 +168,9 @@ const plotCoordinate = (
   const plotData: Partial<plotly.PlotData>[] = [
     {
       type: "parcoords",
+      // @ts-ignore
       dimensions: dimensions,
       labelangle: 30,
-      labelside: "bottom",
-      line: {
-        color: dimensions[0]["values"],
-        // @ts-ignore
-        colorscale: "Blues",
-        colorbar: {
-          title: "Objective value",
-        },
-        showscale: true,
-        reversescale: study.directions[objectiveId] === "maximize",
-      },
     },
   ]
 
